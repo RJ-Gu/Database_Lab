@@ -34,6 +34,22 @@ def query_db(query):
         return False, None
 
 
+def modify_db(query):
+    cnx = connect_db()
+    cursor = cnx.cursor()
+    try:
+        cursor.execute(query)
+        cnx.commit()
+        cursor.close()
+        cnx.close()
+        return True
+    except Exception as e:
+        print(e)
+        cursor.close()
+        cnx.close()
+        return False
+
+
 # 调用存储方法
 def call_db_proc(procname: str, param_tuple: tuple):
     cnx = connect_db()
