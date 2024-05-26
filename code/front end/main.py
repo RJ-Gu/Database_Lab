@@ -135,7 +135,7 @@ def edit_single_student_info():
         new_student_city = request.form['city']
         new_student_education = request.form['education']
         new_student_info = {
-            'student_id': new_student_id,
+            'id': new_student_id,
             'name': new_student_name,
             'gender': new_student_gender,
             'id_card': new_student_id_card,

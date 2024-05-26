@@ -34,11 +34,12 @@ def query_db(query):
         return False, None
 
 
-def modify_db(query):
+# 调用存储方法
+def call_db_proc(procname: str, param_tuple: tuple):
     cnx = connect_db()
     cursor = cnx.cursor()
     try:
-        cursor.execute(query)
+        cursor.callproc(procname, param_tuple)
         cnx.commit()
         cursor.close()
         cnx.close()
@@ -297,13 +298,29 @@ def get_full_college_major_info_list():
     return college_list
 
 
-# TODO: 更新学生信息
 def update_student_info(new_student_info: dict):
-    return True
+    # 生成传输给sql的参数列表
+    param_tuple = (
+        new_student_info['id'], new_student_info['name'], new_student_info['gender'], new_student_info['id_card'],
+        new_student_info['phone'], new_student_info['ethnicity'], new_student_info['city'],
+        new_student_info['education'])
 
-# TODO: 学生转专业
+    result = call_db_proc('edit_student_info', param_tuple)
+    if result is True:
+        return True
+    else:
+        return False
+
+
 def major_change(new_major_change_info: dict):
-    return True
+    # 生成传输给sql的参数列表
+    param_tuple = (new_major_change_info['student_id'], new_major_change_info['major_id'])
+    result = call_db_proc('major_change', param_tuple)
+    if result is True:
+        return True
+    else:
+        return False
+
 
 
 if __name__ == "__main__":
