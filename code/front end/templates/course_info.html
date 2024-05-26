@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <link rel="shortcut icon" href="{{ url_for('static', filename='favicon.ico') }}">
+    <title>学籍管理系统——课程信息</title>
+    <!-- 引入Bootstrap的CSS文件 -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css">
+</head>
+<body>
+<h1>全部课程信息</h1>
+{% if full_course_info_list|length > 0 %}
+<p>共计 {{ full_course_info_list|length }} 门课程</p>
+<table class="table table-striped">
+    <tr>
+        <th>课程号</th>
+        <th>课程名</th>
+        <th>学分</th>
+        <th>学时</th>
+        <th>课程类型</th>
+        <th>开课学院</th>
+        <th>开课专业</th>
+        <th>上课时间</th>
+        <th>上课地点</th>
+        <th>上课老师</th>
+    </tr>
+    {% for course in full_course_info_list %}
+    <tr>
+        <td>{{ course.id }}</td>
+        <td>{{ course.name }}</td>
+        <td>{{ course.credit }}</td>
+        <td>{{ course.full_time }}</td>
+        <td>{{ course.type }}</td>
+        <td>{{ course.college }}</td>
+        <td>{{ course.major }}</td>
+        <td>{{ course.time }}</td>
+        <td>{{ course.location }}</td>
+        <td>
+            <ul>
+                {% for teacher in course.teachers %}
+                <li>{{ teacher }}</li>
+                {% endfor %}
+            </ul>
+        </td>
+    </tr>
+    {% endfor %}
+</table>
+{% else %}
+<p>暂无课程信息</p>
+{% endif %}
+</body>
+</html>

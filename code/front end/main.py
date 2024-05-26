@@ -1,12 +1,13 @@
 from flask import Flask, render_template, redirect, url_for, request
 import back_end_interaction
+import json
 
 app = Flask(__name__)
 
 
 @app.route('/')
 def first_page():
-    return render_template('login.html')
+    return redirect(url_for('login'))
 
 
 @app.route('/login', methods=['GET', 'POST'])
@@ -25,7 +26,7 @@ def login():
                 </script>
                 '''
     else:
-        return redirect(url_for('first_page'))
+        return render_template('login.html')
 
 
 @app.route('/register', methods=['GET', 'POST'])
@@ -52,11 +53,152 @@ def register():
         return render_template('register.html')
 
 
+# 主页面：root和个人用户均可访问
 @app.route('/main_page')
 def main_page():
     student_id = request.args.get('student_id', type=int)
     student_info_list = back_end_interaction.get_student_info_list(student_id)
-    return render_template('main_page.html', student_info_list=student_info_list)
+    return render_template('main_page.html', student_id=student_id, student_info_list=student_info_list)
+
+
+# 个人信息页面：个人用户可访问，root用户不访问
+@app.route('/basic_info', methods=['GET', 'POST'])
+def basic_info():
+    if request.method == 'GET':
+        student_id = request.args.get('student_id', type=int)
+        student_info_list = back_end_interaction.get_student_info_list(student_id)
+        return render_template('basic_info.html', student_id=student_id, student_info_list=student_info_list)
+    else:  # POST
+        pass
+
+
+# 课程信息页面：root和个人用户均可访问
+@app.route('/course_info')
+def course_info():
+    student_id = request.args.get('student_id', type=int)
+    student_info_list = back_end_interaction.get_student_info_list(student_id)
+    full_course_info_list = back_end_interaction.get_full_course_info_list()
+    return render_template('course_info.html', student_id=student_id, student_info_list=student_info_list,
+                           full_course_info_list=full_course_info_list)
+
+
+# 个人课程信息页面：个人用户可访问，root用户不访问
+@app.route('/my_course_info')
+def my_course_info():
+    student_id = request.args.get('student_id', type=int)
+    student_info_list = back_end_interaction.get_student_info_list(student_id)
+    my_course_info_list = back_end_interaction.get_my_course_info_list(student_id)
+    return render_template('my_course_info.html', student_id=student_id, student_info_list=student_info_list,
+                           my_course_info_list=my_course_info_list)
+
+
+# 奖惩情况：root和个人用户均可访问
+@app.route('/reward_punishment')
+def reward_punishment():
+    student_id = request.args.get('student_id', type=int)
+    student_info_list = back_end_interaction.get_student_info_list(student_id)
+    reward_punishment_list = back_end_interaction.get_reward_punishment_list(student_id)
+    return render_template('reward_punishment.html', student_id=student_id, student_info_list=student_info_list,
+                           reward_punishment_list=reward_punishment_list)
+
+
+# 全部学生信息：root用户可访问，个人用户不访问
+@app.route('/student_info')
+def student_info():
+    student_id = request.args.get('student_id', type=int)
+    student_info_list = back_end_interaction.get_student_info_list(0)
+    return render_template('basic_info.html', student_info_list=student_info_list, student_id=student_id)
+
+
+# 全部课程与成绩信息：root用户可访问，个人用户不访问
+@app.route('/course_grade_info')
+def course_grade_info():
+    full_course_grade_info_list = back_end_interaction.get_full_course_grade_info_list(0)
+    print(full_course_grade_info_list)
+    return render_template('course_grade_info.html', full_course_grade_info_list=full_course_grade_info_list)
+
+
+@app.route('/edit_single_student_info', methods=['GET', 'POST'])
+def edit_single_student_info():
+    if request.method == 'GET':
+        student_id = request.args.get('student_id', type=int)
+        student_info_list = back_end_interaction.get_student_info_list(student_id)
+        return render_template('edit_single_student_info.html', student_id=student_id,
+                               student_info_list=student_info_list)
+    else:
+        new_student_id = request.args.get('student_id', type=int)
+        new_student_name = request.form['name']
+        new_student_gender = request.form['gender']
+        new_student_id_card = request.form['id_card']
+        new_student_phone = request.form['phone']
+        new_student_ethnicity = request.form['ethnicity']
+        new_student_city = request.form['city']
+        new_student_education = request.form['education']
+        new_student_info = {
+            'student_id': new_student_id,
+            'name': new_student_name,
+            'gender': new_student_gender,
+            'id_card': new_student_id_card,
+            'phone': new_student_phone,
+            'ethnicity': new_student_ethnicity,
+            'city': new_student_city,
+            'education': new_student_education
+        }
+        print(new_student_info)
+        result = back_end_interaction.update_student_info(new_student_info)
+        if result is True:
+            # 更新成功
+            return """
+            <script>
+            alert('更新成功！');
+            window.location.href = "/main_page?student_id={}";
+            </script>
+            """.format(new_student_id)
+        else:
+            # 更新失败
+            return """
+            <script>
+            alert('更新失败！');
+            window.location.href = "/edit_single_student_info?student_id={}";
+            </script>
+            """.format(new_student_id)
+
+@app.route('/change_major', methods=['GET', 'POST'])
+def change_major():
+    if request.method == 'GET':
+        student_id = request.args.get('student_id', type=int)
+        student_info_list = back_end_interaction.get_student_info_list(student_id)
+        full_college_major_info_list = back_end_interaction.get_full_college_major_info_list()
+        full_college_major_info_list_json = json.dumps(full_college_major_info_list)
+        return render_template('change_major.html', student_id=student_id, student_info_list=student_info_list,
+                               full_college_major_info_list=full_college_major_info_list_json)
+    else:
+        new_student_id = request.args.get('student_id', type=int)
+        new_college_id = request.form['college']
+        new_major_id = request.form['major']
+        new_major_change_info = {
+            'student_id': new_student_id,
+            'college_id': new_college_id,
+            'major_id': new_major_id
+        }
+        print(new_major_change_info)
+        result = back_end_interaction.major_change(new_major_change_info)
+        if result is True:
+            # 更新成功
+            return """
+            <script>
+            alert('转专业成功！');
+            window.location.href = "/main_page?student_id={}";
+            </script>
+            """.format(new_student_id)
+        else:
+            # 更新失败
+            return """
+            <script>
+            alert('转专业失败！');
+            window.location.href = "/change_major?student_id={}";
+            </script>
+            """.format(new_student_id)
 
 
 if __name__ == '__main__':

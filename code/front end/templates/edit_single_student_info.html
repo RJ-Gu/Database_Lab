@@ -1,0 +1,96 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>
+    <link rel="shortcut icon" href="{{ url_for('static', filename='favicon.ico') }}">
+    <title>学籍管理系统——基本信息</title>
+    <!-- 引入Bootstrap的CSS文件 -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css">
+    <script src="{{ url_for('static', filename='function.js') }}"></script>
+    <script>
+        function generate_href_and_submit(){
+            var form = document.getElementsByTagName('form')[0];
+            form.action = generate_href('edit_single_student_info', {{ student_info_list[0].id }});
+            form.submit();
+        }
+    </script>
+</head>
+<body>
+<h1>修改个人基本信息</h1>
+<form action="/edit_single_student_info" method="post">
+    <table class="table table-striped">
+        <thead>
+        <tr>
+            <th>属性</th>
+            {% for student_info_dict in student_info_list %}
+            <th>值</th>
+            {% endfor %}
+        </tr>
+        </thead>
+        <tbody>
+        <tr>
+            <td>学号</td>
+            {% for student_info_dict in student_info_list %}
+            <td>{{ student_info_dict.id }}</td>
+            {% endfor %}
+        </tr>
+        <tr>
+            <td>姓名</td>
+            {% for student_info_dict in student_info_list %}
+            <td><input type="text" name="name" value="{{ student_info_dict.name }}"></td>
+            {% endfor %}
+        </tr>
+        <tr>
+            <td>性别</td>
+            {% for student_info_dict in student_info_list %}
+            <td><input type="text" name="gender" value="{{ student_info_dict.gender }}"></td>
+            {% endfor %}
+        </tr>
+        <tr>
+            <td>身份证号</td>
+            {% for student_info_dict in student_info_list %}
+            <td><input type="text" name="id_card" value="{{ student_info_dict.id_card }}"></td>
+            {% endfor %}
+        </tr>
+        <tr>
+            <td>手机号</td>
+            {% for student_info_dict in student_info_list %}
+            <td><input type="text" name="phone" value="{{ student_info_dict.phone }}"></td>
+            {% endfor %}
+        </tr>
+        <tr>
+            <td>民族</td>
+            {% for student_info_dict in student_info_list %}
+            <td><input type="text" name="ethnicity" value="{{ student_info_dict.ethnicity }}"></td>
+            {% endfor %}
+        </tr>
+        <tr>
+            <td>籍贯</td>
+            {% for student_info_dict in student_info_list %}
+            <td><input type="text" name="city" value="{{ student_info_dict.city }}"></td>
+            {% endfor %}
+        </tr>
+        <tr>
+            <td>学历层次</td>
+            {% for student_info_dict in student_info_list %}
+            <td><input type="text" name="education" value="{{ student_info_dict.education }}"></td>
+            {% endfor %}
+        </tr>
+        <tr>
+            <td>所在专业</td>
+            {% for student_info_dict in student_info_list %}
+            <td>{{ student_info_dict.major }}</td>
+            {% endfor %}
+        </tr>
+        <tr>
+            <td>所在学院</td>
+            {% for student_info_dict in student_info_list %}
+            <td>{{ student_info_dict.college }}</td>
+            {% endfor %}
+        </tr>
+        </tbody>
+    </table>
+    <button type="submit" value="保存" class="btn btn-primary" onclick="generate_href_and_submit()">保存</button>
+</form>
+</body>
+</html>

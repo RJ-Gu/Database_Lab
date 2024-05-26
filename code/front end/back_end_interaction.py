@@ -1,4 +1,5 @@
 import mysql.connector
+import json
 
 
 # 连接数据库
@@ -31,6 +32,7 @@ def query_db(query):
         cursor.close()
         cnx.close()
         return False, None
+
 
 def modify_db(query):
     cnx = connect_db()
@@ -84,6 +86,8 @@ def register_user(username: str, password: str, student_id: int):
     return modify_db(query)
 
 
+# 获取学生信息列表
+# 包括：学号、姓名、性别、身份证号、电话、民族、籍贯、学历、专业号、专业名称、所属院系
 def get_student_info_list(student_id: int):
     def get_extended_info_dict(student_id: int):
         query = "SELECT * FROM student WHERE sno = {}".format(student_id)
@@ -95,7 +99,7 @@ def get_student_info_list(student_id: int):
         student_basic_info_dict = dict(zip(keys, student_basic_info_tuple))
         major_no = student_basic_info_dict['major_no']
         # 根据major_no查询专业名称以及所属院系
-        query = ("SELECT student.smajor, major.mname, college.cname "
+        query = ("SELECT student.smajor, major.mname, college.cname, college.cno "
                  "FROM student, major, college "
                  "WHERE student.smajor = major.mno "
                  "AND major.mcollege = college.cno "
@@ -108,6 +112,7 @@ def get_student_info_list(student_id: int):
         student_info_dict = student_basic_info_dict
         student_info_dict['major'] = student_extended_info_tuple[1]
         student_info_dict['college'] = student_extended_info_tuple[2]
+        student_info_dict['college_no'] = student_extended_info_tuple[3]
         return student_info_dict
 
     # root用户，可以访问所有学生信息
@@ -126,6 +131,182 @@ def get_student_info_list(student_id: int):
         return [get_extended_info_dict(student_id)]
 
 
+def get_full_course_info_list():
+    query = "SELECT * FROM course"
+    err, result = query_db(query)
+    if err is False:
+        return None
+    course_list = []
+    for course_tuple in result:
+        course_dict = {
+            'id': course_tuple[0],  # 课程号
+            'name': course_tuple[1],  # 课程名
+            'major_no': course_tuple[2],  # 专业号
+            'college_no': course_tuple[3],  # 院系号
+            'credit': course_tuple[4],  # 学分
+            'full_time': course_tuple[5],  # 学时
+            'type': course_tuple[6],  # 课程类型
+            'time': course_tuple[7],  # 上课时间
+            'location': course_tuple[8],  # 上课地点
+        }
+        course_list.append(course_dict)
+
+    # 查询专业名称
+    for course_dict in course_list:
+        major_no = course_dict['major_no']
+        query = "SELECT mname FROM major WHERE mno = {}".format(major_no)
+        err, result = query_db(query)
+        if err is False:
+            return None
+        course_dict['major'] = result[0][0]
+
+    # 查询院系名称
+    for course_dict in course_list:
+        college_no = course_dict['college_no']
+        query = "SELECT cname FROM college WHERE cno = {}".format(college_no)
+        err, result = query_db(query)
+        if err is False:
+            return None
+        course_dict['college'] = result[0][0]
+
+    # 查询上课老师
+    for course_dict in course_list:
+        course_id = course_dict['id']
+        # 一门课可能有多个老师
+        query = ("SELECT teacher.tname "
+                 "FROM teacher, teacher_course "
+                 "WHERE teacher.tno = teacher_course.tno "
+                 "AND teacher_course.cno = {}".format(course_id))
+        err, result = query_db(query)
+        if err is False:
+            return None
+        teachers = [x[0] for x in result]
+        course_dict['teachers'] = teachers
+    return course_list
+
+
+def get_my_course_info_list(student_id: int):
+    if student_id != 0:
+        query = ("SELECT course.cno, course.cname, course.ccredit, student_course.grade "
+                 "FROM course, student_course "
+                 "WHERE course.cno = student_course.cno "
+                 "AND student_course.sno = {}".format(student_id))
+    else:
+        query = ("SELECT course.cno, course.cname, course.ccredit, student_course.grade "
+                 "FROM course, student_course "
+                 "WHERE course.cno = student_course.cno")
+    err, result = query_db(query)
+    if err is False:
+        return None
+    my_course_info_list = []
+    for course_tuple in result:
+        course_dict = {
+            'id': course_tuple[0],
+            'name': course_tuple[1],
+            'credit': course_tuple[2],
+            'grade': course_tuple[3]
+        }
+        my_course_info_list.append(course_dict)
+    return my_course_info_list
+
+
+def get_reward_punishment_list(student_id: int):
+    if student_id != 0:
+        query = ("SELECT student.sno, student.sname, reward_punish.rcontent, reward_punish.rtype "
+                 "FROM student, reward_punish, student_reward_punish "
+                 "WHERE reward_punish.rno = student_reward_punish.rno "
+                 "AND student.sno = student_reward_punish.sno "
+                 "AND student_reward_punish.sno = {}".format(student_id))
+    else:
+        query = ("SELECT student.sno, student.sname, reward_punish.rcontent, reward_punish.rtype "
+                 "FROM student, reward_punish, student_reward_punish "
+                 "WHERE reward_punish.rno = student_reward_punish.rno "
+                 "AND student.sno = student_reward_punish.sno")
+    err, result = query_db(query)
+    if err is False:
+        return None
+    reward_punishment_list = []
+    for reward_punishment_tuple in result:
+        reward_punishment_dict = {
+            'id': reward_punishment_tuple[0],
+            'name': reward_punishment_tuple[1],
+            'content': reward_punishment_tuple[2],
+            'type': reward_punishment_tuple[3]
+        }
+        reward_punishment_list.append(reward_punishment_dict)
+    return reward_punishment_list
+
+
+def get_full_course_grade_info_list(student_id: int):
+    if student_id != 0:
+        return None
+    query = "SELECT * FROM student_course"
+    err, result = query_db(query)
+    if err is False:
+        return None
+    full_course_grade_info_list = []
+    for course_grade_tuple in result:
+        course_grade_dict = {
+            'student_id': course_grade_tuple[0],
+            'course_id': course_grade_tuple[1],
+            'grade': course_grade_tuple[2]
+        }
+        full_course_grade_info_list.append(course_grade_dict)
+    # 查询课程名称
+    for course_grade_dict in full_course_grade_info_list:
+        course_id = course_grade_dict['course_id']
+        query = "SELECT cname FROM course WHERE cno = {}".format(course_id)
+        err, result = query_db(query)
+        if err is False:
+            return None
+        course_grade_dict['course_name'] = result[0][0]
+    # 查询学生姓名
+    for course_grade_dict in full_course_grade_info_list:
+        student_id = course_grade_dict['student_id']
+        query = "SELECT sname FROM student WHERE sno = {}".format(student_id)
+        err, result = query_db(query)
+        if err is False:
+            return None
+        course_grade_dict['student_name'] = result[0][0]
+    return full_course_grade_info_list
+
+
+def get_full_college_major_info_list():
+    query = "SELECT * FROM college"
+    err, result = query_db(query)
+    if err is False:
+        return None
+    college_list = []
+    for college_tuple in result:
+        college_dict = {
+            'id': college_tuple[0],
+            'name': college_tuple[1],
+            'major': []
+        }
+        query = "SELECT * FROM major WHERE mcollege = {}".format(college_tuple[0])
+        err, result = query_db(query)
+        if err is False:
+            return None
+        for major_tuple in result:
+            major_dict = {
+                'id': major_tuple[0],
+                'name': major_tuple[1]
+            }
+            college_dict['major'].append(major_dict)
+        college_list.append(college_dict)
+    return college_list
+
+
+# TODO: 更新学生信息
+def update_student_info(new_student_info: dict):
+    return True
+
+# TODO: 学生转专业
+def major_change(new_major_change_info: dict):
+    return True
+
+
 if __name__ == "__main__":
-    result = get_student_info_list(10001)
+    result = get_full_college_major_info_list()
     print(result)
+    json_data = json.dumps(result)
