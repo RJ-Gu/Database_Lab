@@ -109,6 +109,7 @@ CREATE TABLE student_course(
     sno INT,               # 学号
     cno INT,               # 课程号
     grade FLOAT,                # 成绩
+    gpa FLOAT,                  # GPA
     CONSTRAINT PK_student_course PRIMARY KEY (sno, cno),
     CONSTRAINT FK_student_course_sno FOREIGN KEY (sno) REFERENCES student(sno),
     CONSTRAINT FK_student_course_cno FOREIGN KEY (cno) REFERENCES course(cno)

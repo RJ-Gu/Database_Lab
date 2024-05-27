@@ -51,7 +51,7 @@ VALUES (20001, '张老师', '男', '120101197501012345', '15812345678', 50001, '
 
 # course表
 # 课程号（主码）、课程名称、开课专业、开课学院、学分、课时、课程类型、上课时间、上课地点。
-INSERT INTO course
+INSERT INTO course (cno, cname, cmajor, ccollege, ccredit, cfull_time, ctype, ctime, cplace)
 VALUES (30001, '数据库', 40001, 50001, 4, 64, '必修', '16:00', '教学楼101'),
        (30002, '数据结构', 40001, 50001, 4, 64, '必修', '14:00', '教学楼102'),
        (30003, '操作系统', 40001, 50001, 4, 64, '必修', '10:00', '教学楼103'),
@@ -75,7 +75,7 @@ VALUES (60001, '优秀学生奖', '奖励'),
 
 # student_course表
 # 学号、课程号、成绩
-INSERT INTO student_course
+INSERT INTO student_course (sno, cno, grade)
 VALUES (10001, 30008, 98),
        (10001, 30003, 79),
        (10001, 30007, 72),

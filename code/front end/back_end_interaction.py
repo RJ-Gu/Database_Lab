@@ -158,8 +158,8 @@ def get_full_course_info_list():
         course_dict = {
             'id': course_tuple[0],  # 课程号
             'name': course_tuple[1],  # 课程名
-            'major_no': course_tuple[2],  # 专业号
-            'college_no': course_tuple[3],  # 院系号
+            'college_no': course_tuple[2],  # 专业号
+            'major_no': course_tuple[3],  # 院系号
             'credit': course_tuple[4],  # 学分
             'full_time': course_tuple[5],  # 学时
             'type': course_tuple[6],  # 课程类型
@@ -204,12 +204,12 @@ def get_full_course_info_list():
 
 def get_my_course_info_list(student_id: int):
     if student_id != 0:
-        query = ("SELECT course.cno, course.cname, course.ccredit, student_course.grade "
+        query = ("SELECT course.cno, course.cname, course.ccredit, student_course.grade, student_course.gpa "
                  "FROM course, student_course "
                  "WHERE course.cno = student_course.cno "
                  "AND student_course.sno = {}".format(student_id))
     else:
-        query = ("SELECT course.cno, course.cname, course.ccredit, student_course.grade "
+        query = ("SELECT course.cno, course.cname, course.ccredit, student_course.grade, student_course.gpa "
                  "FROM course, student_course "
                  "WHERE course.cno = student_course.cno")
     err, result = query_db(query)
@@ -221,7 +221,8 @@ def get_my_course_info_list(student_id: int):
             'id': course_tuple[0],
             'name': course_tuple[1],
             'credit': course_tuple[2],
-            'grade': course_tuple[3]
+            'grade': course_tuple[3],
+            'gpa': course_tuple[4]
         }
         my_course_info_list.append(course_dict)
     return my_course_info_list
@@ -266,7 +267,8 @@ def get_full_course_grade_info_list(student_id: int):
         course_grade_dict = {
             'student_id': course_grade_tuple[0],
             'course_id': course_grade_tuple[1],
-            'grade': course_grade_tuple[2]
+            'grade': course_grade_tuple[2],
+            'gpa': course_grade_tuple[3]
         }
         full_course_grade_info_list.append(course_grade_dict)
     # 查询课程名称
@@ -340,6 +342,5 @@ def major_change(new_major_change_info: dict):
 
 
 if __name__ == "__main__":
-    result = get_full_college_major_info_list()
+    result = get_full_course_info_list()
     print(result)
-    json_data = json.dumps(result)

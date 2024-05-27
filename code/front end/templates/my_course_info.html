@@ -17,6 +17,7 @@
         <th>课程名</th>
         <th>学分</th>
         <th>成绩</th>
+        <th>GPA</th>
     </tr>
     {% for course in my_course_info_list %}
     <tr>
@@ -24,6 +25,7 @@
         <td>{{ course.name }}</td>
         <td>{{ course.credit }}</td>
         <td>{{ course.grade }}</td>
+        <td>{{ course.gpa }}</td>
     </tr>
     {% endfor %}
 </table>
