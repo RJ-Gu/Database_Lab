@@ -1,6 +1,7 @@
 from flask import Flask, render_template, redirect, url_for, request
 import back_end_interaction
 import json
+import os
 
 app = Flask(__name__)
 
@@ -69,7 +70,28 @@ def basic_info():
         student_info_list = back_end_interaction.get_student_info_list(student_id)
         return render_template('basic_info.html', student_id=student_id, student_info_list=student_info_list)
     else:  # POST
-        pass
+        try:
+            student_id = request.form['student_id']
+            image = request.files['image']
+            print(student_id, image)
+            # 保存图片
+            image_path = os.path.join('static', 'student_images', '{}.jpg'.format(student_id))
+            image.save(image_path)
+            return """
+            <script>
+            alert('图片上传成功！');
+            window.location.href = "/basic_info?student_id={}";
+            </script>
+            """.format(student_id)
+        except Exception as e:
+            student_id = request.form['student_id']
+            print(e)
+            return """
+            <script>
+            alert('图片上传失败！');
+            window.location.href = "/basic_info?student_id={}";
+            </script>
+            """.format(student_id)
 
 
 # 课程信息页面：root和个人用户均可访问
@@ -103,11 +125,35 @@ def reward_punishment():
 
 
 # 全部学生信息：root用户可访问，个人用户不访问
-@app.route('/student_info')
+@app.route('/student_info', methods=['GET', 'POST'])
 def student_info():
-    student_id = request.args.get('student_id', type=int)
-    student_info_list = back_end_interaction.get_student_info_list(0)
-    return render_template('basic_info.html', student_info_list=student_info_list, student_id=student_id)
+    if request.method == 'GET':
+        student_id = request.args.get('student_id', type=int)
+        student_info_list = back_end_interaction.get_student_info_list(0)
+        return render_template('student_info.html', student_info_list=student_info_list, student_id=student_id)
+    else:
+        try:
+            student_id = request.form['student_id']
+            image = request.files['image']
+            print(student_id, image)
+            # 保存图片
+            image_path = os.path.join('static', 'student_images', '{}.jpg'.format(student_id))
+            image.save(image_path)
+            return """
+            <script>
+            alert('图片上传成功！');
+            window.location.href = "/student_info?student_id={}";
+            </script>
+            """.format(student_id)
+        except Exception as e:
+            student_id = request.form['student_id']
+            print(e)
+            return """
+            <script>
+            alert('图片上传失败！');
+            window.location.href = "/student_info?student_id={}";
+            </script>
+            """.format(student_id)
 
 
 # 全部课程与成绩信息：root用户可访问，个人用户不访问
@@ -163,6 +209,7 @@ def edit_single_student_info():
             </script>
             """.format(new_student_id)
 
+
 @app.route('/change_major', methods=['GET', 'POST'])
 def change_major():
     if request.method == 'GET':
@@ -199,6 +246,16 @@ def change_major():
             window.location.href = "/change_major?student_id={}";
             </script>
             """.format(new_student_id)
+
+
+def image_exists(image_path):
+    full_path = os.path.join('static', image_path)
+    return os.path.exists(full_path)
+
+
+@app.context_processor
+def utility_processor():
+    return dict(image_exists=image_exists)
 
 
 if __name__ == '__main__':

@@ -9,7 +9,8 @@
     <script src="{{ url_for('static', filename='function.js') }}"></script>
 </head>
 <body>
-<h1>个人基本信息</h1>
+<!--管理员-->
+<h1>全部学生基本信息</h1>
 <table class="table table-striped">
     <thead>
     <tr>
@@ -47,18 +48,27 @@
             {% else %}
             <img src="{{ url_for('static', filename=default_path) }}" alt="照片" width="200" height="200">
             {% endif %}
-            <form action="/basic_info" method="post" enctype="multipart/form-data">
-                <input type="file" name="image" accept="image/*">
+            <form action="/student_info" method="post" enctype="multipart/form-data">
+                <input type="file" name="image" accept="image/*" style="">
                 <input type="hidden" name="student_id" value="{{ student_info_dict.id }}">
                 <input type="submit" value="上传照片">
             </form>
+        </td>
+        <td>
+            <button type="button" class="btn btn-primary"
+                    onclick="window.location.href=generate_href('/edit_single_student_info', '{{student_info_dict.id}}')">
+                修改该学生信息
+            </button>
+        </td>
+        <td>
+            <button type="button" class="btn btn-primary"
+                    onclick="window.location.href=generate_href('/change_major', '{{student_info_dict.id}}')">
+                修改该学生专业
+            </button>
         </td>
     </tr>
     {% endfor %}
     </tbody>
 </table>
-<button type="button" class="btn btn-primary"
-        onclick="window.location.href=generate_href('/edit_single_student_info', '{{student_info_list[0].id}}')">修改基本信息
-</button>
 </body>
 </html>
