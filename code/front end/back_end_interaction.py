@@ -340,7 +340,14 @@ def major_change(new_major_change_info: dict):
         return False
 
 
+def get_student_total_gpa(student_id: int):
+    query = "SELECT calculate_student_total_gpa({});".format(student_id)
+    err, result = query_db(query)
+    if err is False:
+        return None
+    return result[0][0]
+
 
 if __name__ == "__main__":
-    result = get_full_course_info_list()
+    result = get_student_total_gpa(10001)
     print(result)

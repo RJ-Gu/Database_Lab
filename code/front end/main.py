@@ -110,8 +110,9 @@ def my_course_info():
     student_id = request.args.get('student_id', type=int)
     student_info_list = back_end_interaction.get_student_info_list(student_id)
     my_course_info_list = back_end_interaction.get_my_course_info_list(student_id)
+    my_total_gpa = back_end_interaction.get_student_total_gpa(student_id)
     return render_template('my_course_info.html', student_id=student_id, student_info_list=student_info_list,
-                           my_course_info_list=my_course_info_list)
+                           my_course_info_list=my_course_info_list, my_total_gpa=my_total_gpa)
 
 
 # 奖惩情况：root和个人用户均可访问
