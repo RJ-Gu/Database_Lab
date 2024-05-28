@@ -6,47 +6,55 @@
     <title>学籍管理系统——课程信息</title>
     <!-- 引入Bootstrap的CSS文件 -->
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css">
+    <link rel="stylesheet" href="{{ url_for('static', filename='styles.css')}}">
+    <script src="{{ url_for('static', filename='function.js') }}"></script>
 </head>
 <body>
-<h1>全部课程信息</h1>
-{% if full_course_info_list|length > 0 %}
-<p>共计 {{ full_course_info_list|length }} 门课程</p>
-<table class="table table-striped">
-    <tr>
-        <th>课程号</th>
-        <th>课程名</th>
-        <th>学分</th>
-        <th>学时</th>
-        <th>课程类型</th>
-        <th>开课学院</th>
-        <th>开课专业</th>
-        <th>上课时间</th>
-        <th>上课地点</th>
-        <th>上课老师</th>
-    </tr>
-    {% for course in full_course_info_list %}
-    <tr>
-        <td>{{ course.id }}</td>
-        <td>{{ course.name }}</td>
-        <td>{{ course.credit }}</td>
-        <td>{{ course.full_time }}</td>
-        <td>{{ course.type }}</td>
-        <td>{{ course.college }}</td>
-        <td>{{ course.major }}</td>
-        <td>{{ course.time }}</td>
-        <td>{{ course.location }}</td>
-        <td>
-            <ul>
-                {% for teacher in course.teachers %}
-                <li>{{ teacher }}</li>
-                {% endfor %}
-            </ul>
-        </td>
-    </tr>
-    {% endfor %}
-</table>
-{% else %}
-<p>暂无课程信息</p>
-{% endif %}
+<div class="container mt-5">
+    <h1 class="text-center">全部课程信息</h1>
+    {% if full_course_info_list|length > 0 %}
+        <p class="text-center">共计 {{ full_course_info_list|length }} 门课程</p>
+        <table class="table table-striped table-bordered" id="myTable">
+            <thead>
+            <tr>
+                <th onclick="sortTable(0)">课程号</th>
+                <th onclick="sortTable(1)">课程名</th>
+                <th onclick="sortTable(2)">学分</th>
+                <th onclick="sortTable(3)">学时</th>
+                <th onclick="sortTable(4)">课程类型</th>
+                <th onclick="sortTable(5)">开课学院</th>
+                <th onclick="sortTable(6)">开课专业</th>
+                <th onclick="sortTable(7)">上课时间</th>
+                <th onclick="sortTable(8)">上课地点</th>
+                <th onclick="sortTable(9)">上课老师</th>
+            </tr>
+            </thead>
+            <tbody>
+            {% for course in full_course_info_list %}
+            <tr>
+                <td>{{ course.id }}</td>
+                <td>{{ course.name }}</td>
+                <td>{{ course.credit }}</td>
+                <td>{{ course.full_time }}</td>
+                <td>{{ course.type }}</td>
+                <td>{{ course.college }}</td>
+                <td>{{ course.major }}</td>
+                <td>{{ course.time }}</td>
+                <td>{{ course.location }}</td>
+                <td>
+                    <ul>
+                        {% for teacher in course.teachers %}
+                        <li>{{ teacher }}</li>
+                        {% endfor %}
+                    </ul>
+                </td>
+            </tr>
+            {% endfor %}
+            </tbody>
+        </table>
+    {% else %}
+        <p class="text-center">暂无课程信息</p>
+    {% endif %}
+</div>
 </body>
 </html>

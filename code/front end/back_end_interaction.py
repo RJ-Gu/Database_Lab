@@ -348,6 +348,27 @@ def get_student_total_gpa(student_id: int):
     return result[0][0]
 
 
+def get_largest_student_id():
+    query = "SELECT MAX(sno) FROM student"
+    err, result = query_db(query)
+    if err is False:
+        return None
+    return result[0][0]
+
+def add_student(new_student_info: dict):
+    # 生成传输给sql的参数列表
+    param_tuple = (
+        new_student_info['id'], new_student_info['name'], new_student_info['gender'], new_student_info['id_card'],
+        new_student_info['phone'], new_student_info['ethnicity'], new_student_info['city'],
+        new_student_info['education'], new_student_info['major_id']
+    )
+
+    result = call_db_proc('insert_new_student', param_tuple)
+    if result is True:
+        return True
+    else:
+        return False
+
 if __name__ == "__main__":
-    result = get_student_total_gpa(10001)
+    result = get_largest_student_id()
     print(result)

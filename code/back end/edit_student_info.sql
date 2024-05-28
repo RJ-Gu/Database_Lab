@@ -17,5 +17,3 @@ BEGIN
     end if;
 end //
 DELIMITER ;
-
-CALL edit_student_info(10001, '张一', '男', '110101200001011234', '13812345678', '汉族', '北京', '本科');

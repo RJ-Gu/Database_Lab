@@ -1,7 +1,17 @@
-table {
-  border-collapse: collapse;
+.asc:after {
+  content: ' ▲';
 }
-th, td {
-  border: 1px solid black;
-  padding: 8px;
+
+.desc:after {
+  content: ' ▼';
+}
+
+td {
+  text-align: center;
+  vertical-align: middle;
+}
+
+th {
+  text-align: center;
+  vertical-align: middle;
 }

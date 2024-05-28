@@ -9,36 +9,43 @@
     <script src="{{ url_for('static', filename='function.js') }}"></script>
 </head>
 <body>
-<h1>学籍管理系统</h1>
-<!--    管理员-->
-{% if student_id == 0 %}
-<h2>你好，管理员</h2>
-<button onclick="window.location.href=generate_href('student_info', 0)" class="btn btn-primary">全部学生信息</button>
-<button onclick="window.location.href=generate_href('course_info', 0)" class="btn btn-primary">全部课程信息</button>
-<button onclick="window.location.href=generate_href('course_grade_info', 0)" class="btn btn-primary">
-    全部课程与成绩信息
-</button>
-<button onclick="window.location.href=generate_href('reward_punishment', 0)" class="btn btn-primary">全部奖惩信息
-</button>
-{% else %}
-<h2>你好，{{ student_info_list[0].name }}</h2>
-<h2>你的学号为：{{ student_info_list[0].id }}</h2>
-<button onclick="window.location.href=generate_href('basic_info', '{{ student_info_list[0].id }}')"
-        class="btn btn-primary">你的基本信息
-</button>
-<button onclick="window.location.href=generate_href('course_info', '{{ student_info_list[0].id }}')"
-        class="btn btn-primary">学生课程信息
-</button>
-<button onclick="window.location.href=generate_href('my_course_info', '{{ student_info_list[0].id }}')"
-        class="btn btn-primary">我的课程信息
-</button>
-<button onclick="window.location.href=generate_href('reward_punishment', '{{ student_info_list[0].id }}')"
-        class="btn btn-primary">我的奖惩信息
-</button>
-<button onclick="window.location.href=generate_href('change_major', '{{ student_info_list[0].id }}')"
-        class="btn btn-primary">修改专业
-</button>
-{% endif %}
-
+<div class="container mt-5">
+    <h1 class="text-center">学籍管理系统</h1>
+    <!--管理员-->
+    {% if operator_id == 0 %}
+    <h2 class="text-center">你好，管理员</h2>
+    <div class="d-flex justify-content-center mb-3">
+        <button onclick="window.location.href=generate_href_with_operator_id('student_info', 0, 0)" class="btn btn-primary mr-2">全部学生信息
+        </button>
+        <button onclick="window.location.href=generate_href_with_operator_id('course_info', 0, 0)" class="btn btn-primary mr-2">全部课程信息
+        </button>
+        <button onclick="window.location.href=generate_href_with_operator_id('course_grade_info', 0, 0)" class="btn btn-primary mr-2">
+            全部课程与成绩信息
+        </button>
+        <button onclick="window.location.href=generate_href_with_operator_id('reward_punishment', 0, 0)" class="btn btn-primary mr-2">全部奖惩信息
+        </button>
+    </div>
+    {% else %}
+    <h2 class="text-center">你好，{{ student_info_list[0].name }}</h2>
+    <h2 class="text-center">你的学号为：{{ student_info_list[0].id }}</h2>
+    <div class="d-flex justify-content-center mb-3">
+        <button onclick="window.location.href=generate_href_with_operator_id('basic_info', '{{ student_info_list[0].id }}','{{ student_info_list[0].id }}')"
+                class="btn btn-primary mr-2">你的基本信息
+        </button>
+        <button onclick="window.location.href=generate_href_with_operator_id('course_info', '{{ student_info_list[0].id }}','{{ student_info_list[0].id }}')"
+                class="btn btn-primary mr-2">学生课程信息
+        </button>
+        <button onclick="window.location.href=generate_href_with_operator_id('my_course_info', '{{ student_info_list[0].id }}','{{ student_info_list[0].id }}')"
+                class="btn btn-primary mr-2">我的课程信息
+        </button>
+        <button onclick="window.location.href=generate_href_with_operator_id('reward_punishment', '{{ student_info_list[0].id }}','{{ student_info_list[0].id }}')"
+                class="btn btn-primary mr-2">我的奖惩信息
+        </button>
+        <button onclick="window.location.href=generate_href_with_operator_id('change_major', '{{ student_info_list[0].id }}','{{ student_info_list[0].id }}')"
+                class="btn btn-primary">修改专业
+        </button>
+    </div>
+    {% endif %}
+</div>
 </body>
 </html>
