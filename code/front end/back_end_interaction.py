@@ -369,6 +369,28 @@ def add_student(new_student_info: dict):
     else:
         return False
 
+def delete_student_course_info(student_id: int, course_id: int):
+    query = "DELETE FROM student_course WHERE sno = {} AND cno = {}".format(student_id, course_id)
+    result = modify_db(query)
+    if result is True:
+        return True
+    else:
+        return False
+
+def add_student_course_info(student_id: int, course_id: int, grade):
+    query = None
+    if grade is None:
+        query = "INSERT INTO student_course (sno, cno) VALUES ({}, {})".format(student_id, course_id)
+    else:
+        query = "INSERT INTO student_course (sno, cno, grade) VALUES ({}, {}, {})".format(student_id, course_id, grade)
+    result = modify_db(query)
+    if result is True:
+        return True
+    else:
+        return False
+
 if __name__ == "__main__":
-    result = get_largest_student_id()
-    print(result)
+    student_info = get_student_info_list(0)
+    course_info = get_full_course_info_list()
+    print(student_info)
+

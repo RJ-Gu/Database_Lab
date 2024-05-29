@@ -164,11 +164,37 @@ def student_info():
 
 
 # 全部课程与成绩信息：root用户可访问，个人用户不访问
-@app.route('/course_grade_info')
+@app.route('/course_grade_info', methods=['GET', 'POST'])
 def course_grade_info():
-    full_course_grade_info_list = back_end_interaction.get_full_course_grade_info_list(0)
-    # print(full_course_grade_info_list)
-    return render_template('course_grade_info.html', full_course_grade_info_list=full_course_grade_info_list)
+    if request.method == 'GET':
+        full_course_grade_info_list = back_end_interaction.get_full_course_grade_info_list(0)
+        # print(full_course_grade_info_list)
+        return render_template('course_grade_info.html', full_course_grade_info_list=full_course_grade_info_list)
+    else: # POST
+        operator_id = request.args.get('operator_id', type=int)
+        student_id = request.form['student_id']
+        course_id = request.form['course_id']
+        student_id = int(student_id)
+        course_id = int(course_id)
+        # print(operator_id, student_id, course_id)
+        # 删除学生课程信息
+        result = back_end_interaction.delete_student_course_info(student_id, course_id)
+        if result is True:
+            # 删除成功
+            return """
+            <script>
+            alert('删除成功！');
+            window.location.href = "/course_grade_info?operator_id={}";
+            </script>
+            """.format(operator_id)
+        else:
+            # 删除失败
+            return """
+            <script>
+            alert('删除失败！');
+            window.location.href = "/course_grade_info?operator_id={}";
+            </script>
+            """.format(operator_id)
 
 
 @app.route('/edit_single_student_info', methods=['GET', 'POST'])
@@ -311,6 +337,47 @@ def add_student():
             window.location.href = "/add_student?operator_id={}";
             </script>
             """.format(new_student_id)
+
+
+# 添加学生课程信息
+@app.route('/add_student_course', methods=['GET', 'POST'])
+def add_student_course():
+    if request.method == 'GET':
+        operator_id = request.args.get('operator_id', type=int)
+        student_id = request.args.get('student_id', type=int)
+        student_info_list = back_end_interaction.get_student_info_list(operator_id)
+        student_info_list_json = json.dumps(student_info_list)
+        full_course_info_list = back_end_interaction.get_full_course_info_list()
+        full_course_info_list_json = json.dumps(full_course_info_list)
+        return render_template('add_student_course.html', operator_id=operator_id, student_id=student_id,
+                               full_course_info_list=full_course_info_list_json, student_info_list=student_info_list_json)
+    else:
+        operator_id = request.args.get('operator_id', type=int)
+        student_id = request.form['student_id']
+        course_id = request.form['course_id']
+        grade = request.form['grade']
+        student_id = int(student_id)
+        course_id = int(course_id)
+        if grade == '':
+            grade = None
+        print(operator_id, student_id, course_id, grade)
+        result = back_end_interaction.add_student_course_info(student_id, course_id, grade)
+        if result is True:
+            # 添加成功
+            return """
+            <script>
+            alert('添加成功！');
+            window.location.href = "/course_grade_info?operator_id={}";
+            </script>
+            """.format(operator_id)
+        else:
+            # 添加失败
+            return """
+            <script>
+            alert('添加失败！');
+            window.location.href = "/add_student_course?student_id={}&operator_id={}";
+            </script>
+            """.format(0, operator_id)
 
 
 def image_exists(image_path):
