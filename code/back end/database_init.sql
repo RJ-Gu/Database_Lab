@@ -60,7 +60,6 @@ CREATE TABLE teacher(
 CREATE TABLE course(
     cno INT PRIMARY KEY,   # 课程号
     cname VARCHAR(20),          # 课程名称
-    ccollege INT,       # 开课学院
     cmajor INT,         # 开课专业
     ccredit FLOAT,              # 学分
     cfull_time INT,             # 课时
@@ -102,7 +101,6 @@ CREATE TABLE reward_punish(
 ALTER TABLE student ADD CONSTRAINT FK_student_smajor FOREIGN KEY (smajor) REFERENCES major(mno);
 ALTER TABLE teacher ADD CONSTRAINT FK_teacher_tcollege FOREIGN KEY (tcollege) REFERENCES college(cno);
 ALTER TABLE major ADD CONSTRAINT FK_major_mcollege FOREIGN KEY (mcollege) REFERENCES college(cno);
-ALTER TABLE course ADD CONSTRAINT FK_course_ccollege FOREIGN KEY (ccollege) REFERENCES college(cno);
 ALTER TABLE course ADD CONSTRAINT FK_course_cmajor FOREIGN KEY (cmajor) REFERENCES major(mno);
 
 CREATE TABLE student_course(

@@ -158,13 +158,12 @@ def get_full_course_info_list():
         course_dict = {
             'id': course_tuple[0],  # 课程号
             'name': course_tuple[1],  # 课程名
-            'college_no': course_tuple[2],  # 专业号
-            'major_no': course_tuple[3],  # 院系号
-            'credit': course_tuple[4],  # 学分
-            'full_time': course_tuple[5],  # 学时
-            'type': course_tuple[6],  # 课程类型
-            'time': course_tuple[7],  # 上课时间
-            'location': course_tuple[8],  # 上课地点
+            'major_no': course_tuple[2],  # 专业号
+            'credit': course_tuple[3],  # 学分
+            'full_time': course_tuple[4],  # 学时
+            'type': course_tuple[5],  # 课程类型
+            'time': course_tuple[6],  # 上课时间
+            'location': course_tuple[7]  # 上课地点
         }
         course_list.append(course_dict)
 
@@ -179,7 +178,12 @@ def get_full_course_info_list():
 
     # 查询院系名称
     for course_dict in course_list:
-        college_no = course_dict['college_no']
+        major_no = course_dict['major_no']
+        query = "SELECT mcollege FROM major WHERE mno = {}".format(major_no)
+        err, result = query_db(query)
+        if err is False:
+            return None
+        college_no = result[0][0]
         query = "SELECT cname FROM college WHERE cno = {}".format(college_no)
         err, result = query_db(query)
         if err is False:
@@ -350,6 +354,13 @@ def get_student_total_gpa(student_id: int):
 
 def get_largest_student_id():
     query = "SELECT MAX(sno) FROM student"
+    err, result = query_db(query)
+    if err is False:
+        return None
+    return result[0][0]
+
+def get_largest_course_id():
+    query = "SELECT MAX(cno) FROM course"
     err, result = query_db(query)
     if err is False:
         return None

@@ -69,7 +69,8 @@ def basic_info():
         operator_id = request.args.get('operator_id', type=int)
         student_id = request.args.get('student_id', type=int)
         student_info_list = back_end_interaction.get_student_info_list(student_id)
-        return render_template('basic_info.html', operator_id=operator_id, student_id=student_id, student_info_list=student_info_list)
+        return render_template('basic_info.html', operator_id=operator_id, student_id=student_id,
+                               student_info_list=student_info_list)
     else:  # POST
         try:
             operator_id = request.args.get('operator_id')
@@ -101,9 +102,11 @@ def basic_info():
 @app.route('/course_info')
 def course_info():
     student_id = request.args.get('student_id', type=int)
+    operator_id = request.args.get('operator_id', type=int)
     student_info_list = back_end_interaction.get_student_info_list(student_id)
     full_course_info_list = back_end_interaction.get_full_course_info_list()
-    return render_template('course_info.html', student_id=student_id, student_info_list=student_info_list,
+    return render_template('course_info.html', operator_id=operator_id, student_id=student_id,
+                           student_info_list=student_info_list,
                            full_course_info_list=full_course_info_list)
 
 
@@ -135,7 +138,8 @@ def student_info():
         operator_id = request.args.get('operator_id', type=int)
         student_id = request.args.get('student_id', type=int)
         student_info_list = back_end_interaction.get_student_info_list(0)
-        return render_template('student_info.html', operator_id=operator_id, student_info_list=student_info_list, student_id=student_id)
+        return render_template('student_info.html', operator_id=operator_id, student_info_list=student_info_list,
+                               student_id=student_id)
     else:
         try:
             operator_id = request.args.get('operator_id', type=int)
@@ -170,7 +174,7 @@ def course_grade_info():
         full_course_grade_info_list = back_end_interaction.get_full_course_grade_info_list(0)
         # print(full_course_grade_info_list)
         return render_template('course_grade_info.html', full_course_grade_info_list=full_course_grade_info_list)
-    else: # POST
+    else:  # POST
         operator_id = request.args.get('operator_id', type=int)
         student_id = request.form['student_id']
         course_id = request.form['course_id']
@@ -339,6 +343,56 @@ def add_student():
             """.format(new_student_id)
 
 
+# 添加课程信息
+@app.route('/add_course', methods=['GET', 'POST'])
+def add_course():
+    if request.method == 'GET':
+        largest_course_id = back_end_interaction.get_largest_course_id() + 1
+        full_college_major_info_list = back_end_interaction.get_full_college_major_info_list()
+        full_college_major_info_list_json = json.dumps(full_college_major_info_list)
+        return render_template('add_course.html', largest_course_id=largest_course_id,
+                               full_college_major_info_list=full_college_major_info_list_json)
+    else: # POST
+        new_course_id = request.args.get('course_id', type=int)
+        new_course_name = request.form['name']
+        new_course_credit = request.form['credit']
+        new_course_full_time = request.form['full_time']
+        new_course_type = request.form['type']
+        new_course_time = request.form['time']
+        new_course_place = request.form['place']
+        new_course_college_id = request.form['college']
+        new_course_major_id = request.form['major']
+        new_course_info = {
+            'id': new_course_id,
+            'name': new_course_name,
+            'credit': new_course_credit,
+            'full_time': new_course_full_time,
+            'type': new_course_type,
+            'time': new_course_time,
+            'place': new_course_place,
+            'college_id': new_course_college_id,
+            'major_id': new_course_major_id
+        }
+        # print(new_course_info)
+        result = back_end_interaction.add_course(new_course_info)
+        if result is True:
+            # 添加成功
+            return """
+            <script>
+            alert('添加成功！');
+            window.location.href = "/course_info?operator_id={}";
+            </script>
+            """.format(0)
+        else:
+            # 添加失败
+            return """
+            <script>
+            alert('添加失败！');
+            window.location.href = "/add_course?operator_id={}&course_id={}";
+            </script>
+            """.format(0, 0)
+
+
 # 添加学生课程信息
 @app.route('/add_student_course', methods=['GET', 'POST'])
 def add_student_course():
@@ -350,7 +404,8 @@ def add_student_course():
         full_course_info_list = back_end_interaction.get_full_course_info_list()
         full_course_info_list_json = json.dumps(full_course_info_list)
         return render_template('add_student_course.html', operator_id=operator_id, student_id=student_id,
-                               full_course_info_list=full_course_info_list_json, student_info_list=student_info_list_json)
+                               full_course_info_list=full_course_info_list_json,
+                               student_info_list=student_info_list_json)
     else:
         operator_id = request.args.get('operator_id', type=int)
         student_id = request.form['student_id']
