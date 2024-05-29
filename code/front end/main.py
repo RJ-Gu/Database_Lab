@@ -250,6 +250,11 @@ def edit_single_student_info():
             """.format(new_student_id, operator_id)
 
 
+@app.route('/edit_single_course_info', methods=['GET', 'POST'])
+def edit_single_course_info():
+    pass
+
+
 @app.route('/change_major', methods=['GET', 'POST'])
 def change_major():
     if request.method == 'GET':

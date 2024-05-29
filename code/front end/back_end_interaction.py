@@ -380,6 +380,22 @@ def add_student(new_student_info: dict):
     else:
         return False
 
+def add_course(new_course_info: dict):
+    param_tuple = (
+        new_course_info['id'], new_course_info['name'], new_course_info['credit'],
+        new_course_info['full_time'], new_course_info['type'], new_course_info['time'],
+        new_course_info['place'], new_course_info['major_id']
+    )
+
+    result = call_db_proc('insert_new_course', param_tuple)
+    if result is True:
+        return True
+    else:
+        return False
+
+
+
+
 def delete_student_course_info(student_id: int, course_id: int):
     query = "DELETE FROM student_course WHERE sno = {} AND cno = {}".format(student_id, course_id)
     result = modify_db(query)
