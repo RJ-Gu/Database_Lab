@@ -10,6 +10,10 @@ function generate_href_with_operator_id_and_course_id(next_page_name, operator_i
     return next_page_name + '?operator_id=' + operator_id + '&course_id=' + course_id;
 }
 
+function generate_href_with_operator_id_and_reward_punishment_id(next_page_name, operator_id, reward_punishment_id) {
+    return next_page_name + '?operator_id=' + operator_id + '&reward_punishment_id=' + reward_punishment_id;
+}
+
 function sortTable(n) {
     var table, rows, switching, i, x, y, shouldSwitch, dir, switchcount = 0;
     table = document.getElementById("myTable");

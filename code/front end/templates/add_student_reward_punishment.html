@@ -3,7 +3,7 @@
 <head>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>
     <link rel="shortcut icon" href="{{ url_for('static', filename='favicon.ico') }}">
-    <title>学籍管理系统——添加学生成绩信息</title>
+    <title>学籍管理系统——添加学生奖惩信息</title>
     <!-- 引入Bootstrap的CSS文件 -->
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css">
     <link rel="stylesheet" href="{{ url_for('static', filename='styles.css')}}">
@@ -13,13 +13,14 @@
         $(document).ready(function (){
             var student_id_select_element = document.getElementById('student_id_select');
             var student_name_select_element = document.getElementById('student_name_select');
-            var course_id_select_element = document.getElementById('course_id_select');
-            var course_name_select_element = document.getElementById('course_name_select');
+            var reward_punishment_id_select_element = document.getElementById('reward_punishment_id_select');
+            var reward_punishment_content_select_element = document.getElementById('reward_punishment_content_select');
+            var reward_punishment_type_select_element = document.getElementById('reward_punishment_type_select');
 
             var student_info_list_json = {{ student_info_list | tojson }};
             var student_info_list = JSON.parse(student_info_list_json);
-            var full_course_info_list_json = {{ full_course_info_list | tojson }};
-            var full_course_info_list = JSON.parse(full_course_info_list_json);
+            var full_reward_punishment_info_list_json = {{ full_reward_punishment_info_list | tojson }};
+            var full_reward_punishment_info_list = JSON.parse(full_reward_punishment_info_list_json);
 
             // 初始化学号、姓名、课程号、课程名下拉框
             for (var i = 0; i < student_info_list.length; i++) {
@@ -33,20 +34,20 @@
                 student_name_option.text = student_info_list[i].name;
                 student_name_select_element.appendChild(student_name_option);
             }
-            for (var i = 0; i < full_course_info_list.length; i++) {
-                var course_id_option = document.createElement('option');
-                course_id_option.value = full_course_info_list[i].id;
-                course_id_option.text = full_course_info_list[i].id;
-                course_id_select_element.appendChild(course_id_option);
+            for (var i = 0; i < full_reward_punishment_info_list.length; i++) {
+                var reward_punishment_id_option = document.createElement('option');
+                reward_punishment_id_option.value = full_reward_punishment_info_list[i].id;
+                reward_punishment_id_option.text = full_reward_punishment_info_list[i].id;
+                reward_punishment_id_select_element.appendChild(reward_punishment_id_option);
 
-                var course_name_option = document.createElement('option');
-                course_name_option.value = full_course_info_list[i].name;
-                course_name_option.text = full_course_info_list[i].name;
-                course_name_select_element.appendChild(course_name_option);
+                var reward_punishment_content_option = document.createElement('option');
+                reward_punishment_content_option.value = full_reward_punishment_info_list[i].content;
+                reward_punishment_content_option.text = full_reward_punishment_info_list[i].content;
+                reward_punishment_content_select_element.appendChild(reward_punishment_content_option);
             }
 
 
-            function updateSelection(selectElement, targetElement, infoList, infoKey) {
+            function updateStudentSelection(selectElement, targetElement, infoList, infoKey) {
                 var selectedValue = selectElement.value;
                 for (var i = 0; i < infoList.length; i++){
                     if (infoList[i][infoKey] == selectedValue) {
@@ -56,35 +57,47 @@
                 }
             }
 
+            function updateRewardPunishmentSelection(selectElement, targetElement, infoList, infoKey) {
+                var selectedValue = selectElement.value;
+                for (var i = 0; i < infoList.length; i++){
+                    if (infoList[i][infoKey] == selectedValue) {
+                        targetElement.value = infoList[i][(infoKey == 'id') ? 'content' : 'id'];
+                        break;
+                    }
+                }
+            }
+
             student_id_select_element.addEventListener('change', function (){
-                updateSelection(this, student_name_select_element, student_info_list, 'id');
+                updateStudentSelection(this, student_name_select_element, student_info_list, 'id');
             });
 
             student_name_select_element.addEventListener('change', function (){
-                updateSelection(this, student_id_select_element, student_info_list, 'name');
+                updateStudentSelection(this, student_id_select_element, student_info_list, 'name');
             });
 
-            course_id_select_element.addEventListener('change', function (){
-                updateSelection(this, course_name_select_element, full_course_info_list, 'id');
+            reward_punishment_id_select_element.addEventListener('change', function (){
+                updateRewardPunishmentSelection(this, reward_punishment_content_select_element,
+                    full_reward_punishment_info_list, 'id');
             });
 
-            course_name_select_element.addEventListener('change', function (){
-                updateSelection(this, course_id_select_element, full_course_info_list, 'name');
+            reward_punishment_content_select_element.addEventListener('change', function (){
+                updateRewardPunishmentSelection(this, reward_punishment_id_select_element,
+                    full_reward_punishment_info_list, 'content');
             });
 
         });
         function generate_href_and_submit() {
             var form = document.getElementsByTagName('form')[0];
             var student_id = document.getElementById('student_id_select').value;
-            form.action = generate_href_with_operator_id('add_student_course', student_id, 0);
+            form.action = generate_href_with_operator_id('add_student_reward_punishment', student_id, 0);
             form.submit();
         }
     </script>
 </head>
 <body>
 <div class="container mt-5">
-    <h1 class="text-center">添加学生成绩信息</h1>
-    <form action="/add_student_course" method="post">
+    <h1 class="text-center">添加学生奖惩信息</h1>
+    <form action="/add_student_reward_punishment" method="post">
         <table class="table table-striped table-bordered">
             <thead>
             <tr>
@@ -110,25 +123,19 @@
                 </td>
             </tr>
             <tr>
-                <td>课程号</td>
+                <td>奖惩号</td>
                 <td>
-                    <select name="course_id" class="form-control" id="course_id_select">
-                        <option>请选择课程号</option>
+                    <select name="reward_punishment_id" class="form-control" id="reward_punishment_id_select">
+                        <option>请选择奖惩号</option>
                     </select>
                 </td>
             </tr>
             <tr>
-                <td>课程名</td>
+                <td>奖惩内容</td>
                 <td>
-                    <select name="course_name" class="form-control" id="course_name_select">
-                        <option>请选择课程名</option>
+                    <select name="content" class="form-control" id="reward_punishment_content_select">
+                        <option>请选择奖惩内容</option>
                     </select>
-                </td>
-            </tr>
-            <tr>
-                <td>成绩</td>
-                <td>
-                    <input type="number" name="grade" class="form-control">
                 </td>
             </tr>
             </tbody>

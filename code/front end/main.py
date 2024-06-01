@@ -122,13 +122,36 @@ def my_course_info():
 
 
 # 奖惩情况：root和个人用户均可访问
-@app.route('/reward_punishment')
+@app.route('/reward_punishment', methods=['GET', 'POST'])
 def reward_punishment():
-    student_id = request.args.get('student_id', type=int)
-    student_info_list = back_end_interaction.get_student_info_list(student_id)
-    reward_punishment_list = back_end_interaction.get_reward_punishment_list(student_id)
-    return render_template('reward_punishment.html', student_id=student_id, student_info_list=student_info_list,
-                           reward_punishment_list=reward_punishment_list)
+    if request.method == 'GET':
+        operator_id = request.args.get('operator_id', type=int)
+        student_id = request.args.get('student_id', type=int)
+        student_info_list = back_end_interaction.get_student_info_list(student_id)
+        reward_punishment_list = back_end_interaction.get_student_reward_punishment_list(student_id)
+        return render_template('reward_punishment.html', operator_id=operator_id, student_info_list=student_info_list,
+                               reward_punishment_list=reward_punishment_list)
+    else:  # POST
+        operator_id = request.args.get('operator_id', type=int)
+        student_id = request.form['student_id']
+        reward_punishment_id = request.form['reward_punishment_id']
+        result = back_end_interaction.delete_student_reward_punishment_info(student_id, reward_punishment_id)
+        if result is True:
+            # 删除成功
+            return """
+            <script>
+            alert('删除成功！');
+            window.location.href = "/reward_punishment?student_id={}&operator_id={}";
+            </script>
+            """.format(student_id, operator_id)
+        else:
+            # 删除失败
+            return """
+            <script>
+            alert('删除失败！');
+            window.location.href = "/reward_punishment?student_id={}&operator_id={}";
+            </script>
+            """.format(student_id, operator_id)
 
 
 # 全部学生信息：root用户可访问，个人用户不访问
@@ -252,7 +275,56 @@ def edit_single_student_info():
 
 @app.route('/edit_single_course_info', methods=['GET', 'POST'])
 def edit_single_course_info():
-    pass
+    if request.method == 'GET':
+        operator_id = request.args.get('operator_id', type=int)
+        course_id = request.args.get('course_id', type=int)
+        course_info = back_end_interaction.get_single_course_info_by_id(course_id)
+        full_college_major_info_list = back_end_interaction.get_full_college_major_info_list()
+        full_college_major_info_list_json = json.dumps(full_college_major_info_list)
+        return render_template('edit_single_course_info.html', operator_id=operator_id,
+                               course_id=course_id,
+                               course_info=course_info,
+                               full_college_major_info_list=full_college_major_info_list_json)
+    else:  # POST
+        operator_id = request.args.get('operator_id', type=int)
+        course_id = request.args.get('course_id', type=int)
+        new_course_name = request.form['name']
+        new_course_credit = request.form['credit']
+        new_course_full_time = request.form['full_time']
+        new_course_type = request.form['type']
+        new_course_time = request.form['time']
+        new_course_place = request.form['place']
+        new_course_college_id = request.form['college']
+        new_course_major_id = request.form['major']
+        new_course_info = {
+            'id': course_id,
+            'name': new_course_name,
+            'credit': new_course_credit,
+            'full_time': new_course_full_time,
+            'type': new_course_type,
+            'time': new_course_time,
+            'place': new_course_place,
+            'college_id': new_course_college_id,
+            'major_id': new_course_major_id
+        }
+        # print(new_course_info)
+        result = back_end_interaction.update_course_info(new_course_info)
+        if result is True:
+            # 更新成功
+            return """
+            <script>
+            alert('更新成功！');
+            window.location.href = "/course_info?operator_id={}";
+            </script>
+            """.format(operator_id)
+        else:
+            # 更新失败
+            return """
+            <script>
+            alert('更新失败！');
+            window.location.href = "/edit_single_course_info?course_id={}&operator_id={}";
+            </script>
+            """.format(course_id, operator_id)
 
 
 @app.route('/change_major', methods=['GET', 'POST'])
@@ -357,7 +429,7 @@ def add_course():
         full_college_major_info_list_json = json.dumps(full_college_major_info_list)
         return render_template('add_course.html', largest_course_id=largest_course_id,
                                full_college_major_info_list=full_college_major_info_list_json)
-    else: # POST
+    else:  # POST
         new_course_id = request.args.get('course_id', type=int)
         new_course_name = request.form['name']
         new_course_credit = request.form['credit']
@@ -438,6 +510,82 @@ def add_student_course():
             window.location.href = "/add_student_course?student_id={}&operator_id={}";
             </script>
             """.format(0, operator_id)
+
+
+# 添加奖惩信息
+@app.route('/add_reward_punishment', methods=['GET', 'POST'])
+def add_reward_punishment():
+    if request.method == 'GET':
+        operator_id = request.args.get('operator_id', type=int)
+        largest_reward_punishment_id = back_end_interaction.get_largest_reward_punishment_id() + 1
+        return render_template('add_reward_punishment.html', operator_id=operator_id,
+                               largest_reward_punishment_id=largest_reward_punishment_id)
+    else:
+        operator_id = request.args.get('operator_id', type=int)
+        reward_punishment_id = request.args.get('reward_punishment_id', type=int)
+        content = request.form['content']
+        type = request.form['type']
+        new_reward_punishment_info = {
+            'id': reward_punishment_id,
+            'content': content,
+            'type': type
+        }
+        # print(new_reward_punishment_info)
+        result = back_end_interaction.add_reward_punishment(new_reward_punishment_info)
+        if result is True:
+            # 添加成功
+            return """
+            <script>
+            alert('添加成功！');
+            window.location.href = "/reward_punishment?student_id={}&operator_id={}";
+            </script>
+            """.format(0, operator_id)
+        else:
+            # 添加失败
+            return """
+            <script>
+            alert('添加失败！');
+            window.location.href = "/add_reward_punishment?operator_id={}&reward_punishment_id={}";
+            </script>
+            """.format(operator_id, reward_punishment_id)
+
+
+# 添加学生奖惩信息
+@app.route('/add_student_reward_punishment', methods=['GET', 'POST'])
+def add_student_reward_punishment():
+    if request.method == 'GET':
+        operator_id = request.args.get('operator_id', type=int)
+        student_info_list = back_end_interaction.get_student_info_list(0)
+        student_info_list_json = json.dumps(student_info_list)
+        full_reward_punishment_info_list = back_end_interaction.get_full_reward_punishment_info_list()
+        full_reward_punishment_info_list_json = json.dumps(full_reward_punishment_info_list)
+        return render_template('add_student_reward_punishment.html', operator_id=operator_id,
+                               student_info_list=student_info_list_json,
+                               full_reward_punishment_info_list=full_reward_punishment_info_list_json)
+    else:
+        operator_id = request.args.get('operator_id', type=int)
+        student_id = request.form['student_id']
+        reward_punishment_id = request.form['reward_punishment_id']
+        student_id = int(student_id)
+        reward_punishment_id = int(reward_punishment_id)
+        # print(operator_id, student_id, reward_punishment_id)
+        result = back_end_interaction.add_student_reward_punishment_info(student_id, reward_punishment_id)
+        if result is True:
+            # 添加成功
+            return """
+            <script>
+            alert('添加成功！');
+            window.location.href = "/reward_punishment?student_id={}&operator_id={}";
+            </script>
+            """.format(0, operator_id)
+        else:
+            # 添加失败
+            return """
+            <script>
+            alert('添加失败！');
+            window.location.href = "/add_student_reward_punishment?operator_id={}";
+            </script>
+            """.format(operator_id)
 
 
 def image_exists(image_path):

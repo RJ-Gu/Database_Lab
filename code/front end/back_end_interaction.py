@@ -206,6 +206,14 @@ def get_full_course_info_list():
     return course_list
 
 
+def get_single_course_info_by_id(course_id: int):
+    full_course_info_list = get_full_course_info_list()
+    for course_dict in full_course_info_list:
+        if course_dict['id'] == course_id:
+            return course_dict
+    return None
+
+
 def get_my_course_info_list(student_id: int):
     if student_id != 0:
         query = ("SELECT course.cno, course.cname, course.ccredit, student_course.grade, student_course.gpa "
@@ -232,15 +240,15 @@ def get_my_course_info_list(student_id: int):
     return my_course_info_list
 
 
-def get_reward_punishment_list(student_id: int):
+def get_student_reward_punishment_list(student_id: int):
     if student_id != 0:
-        query = ("SELECT student.sno, student.sname, reward_punish.rcontent, reward_punish.rtype "
+        query = ("SELECT student.sno, student.sname, reward_punish.rno, reward_punish.rcontent, reward_punish.rtype "
                  "FROM student, reward_punish, student_reward_punish "
                  "WHERE reward_punish.rno = student_reward_punish.rno "
                  "AND student.sno = student_reward_punish.sno "
                  "AND student_reward_punish.sno = {}".format(student_id))
     else:
-        query = ("SELECT student.sno, student.sname, reward_punish.rcontent, reward_punish.rtype "
+        query = ("SELECT student.sno, student.sname, reward_punish.rno, reward_punish.rcontent, reward_punish.rtype "
                  "FROM student, reward_punish, student_reward_punish "
                  "WHERE reward_punish.rno = student_reward_punish.rno "
                  "AND student.sno = student_reward_punish.sno")
@@ -252,8 +260,9 @@ def get_reward_punishment_list(student_id: int):
         reward_punishment_dict = {
             'id': reward_punishment_tuple[0],
             'name': reward_punishment_tuple[1],
-            'content': reward_punishment_tuple[2],
-            'type': reward_punishment_tuple[3]
+            'rno': reward_punishment_tuple[2],
+            'content': reward_punishment_tuple[3],
+            'type': reward_punishment_tuple[4]
         }
         reward_punishment_list.append(reward_punishment_dict)
     return reward_punishment_list
@@ -320,6 +329,22 @@ def get_full_college_major_info_list():
     return college_list
 
 
+def get_full_reward_punishment_info_list():
+    query = "SELECT * FROM reward_punish"
+    err, result = query_db(query)
+    if err is False:
+        return None
+    reward_punishment_list = []
+    for reward_punishment_tuple in result:
+        reward_punishment_dict = {
+            'id': reward_punishment_tuple[0],
+            'content': reward_punishment_tuple[1],
+            'type': reward_punishment_tuple[2]
+        }
+        reward_punishment_list.append(reward_punishment_dict)
+    return reward_punishment_list
+
+
 def update_student_info(new_student_info: dict):
     # 生成传输给sql的参数列表
     param_tuple = (
@@ -328,6 +353,20 @@ def update_student_info(new_student_info: dict):
         new_student_info['education'])
 
     result = call_db_proc('edit_student_info', param_tuple)
+    if result is True:
+        return True
+    else:
+        return False
+
+
+def update_course_info(new_course_info: dict):
+    param_tuple = (
+        new_course_info['id'], new_course_info['name'], new_course_info['credit'],
+        new_course_info['full_time'], new_course_info['type'], new_course_info['time'],
+        new_course_info['place'], new_course_info['major_id']
+    )
+
+    result = call_db_proc('edit_course_info', param_tuple)
     if result is True:
         return True
     else:
@@ -359,12 +398,22 @@ def get_largest_student_id():
         return None
     return result[0][0]
 
+
 def get_largest_course_id():
     query = "SELECT MAX(cno) FROM course"
     err, result = query_db(query)
     if err is False:
         return None
     return result[0][0]
+
+
+def get_largest_reward_punishment_id():
+    query = "SELECT MAX(rno) FROM reward_punish"
+    err, result = query_db(query)
+    if err is False:
+        return None
+    return result[0][0]
+
 
 def add_student(new_student_info: dict):
     # 生成传输给sql的参数列表
@@ -380,6 +429,7 @@ def add_student(new_student_info: dict):
     else:
         return False
 
+
 def add_course(new_course_info: dict):
     param_tuple = (
         new_course_info['id'], new_course_info['name'], new_course_info['credit'],
@@ -394,15 +444,17 @@ def add_course(new_course_info: dict):
         return False
 
 
+def add_reward_punishment(new_reward_punishment_info: dict):
+    param_tuple = (
+        new_reward_punishment_info['id'], new_reward_punishment_info['content'], new_reward_punishment_info['type']
+    )
 
-
-def delete_student_course_info(student_id: int, course_id: int):
-    query = "DELETE FROM student_course WHERE sno = {} AND cno = {}".format(student_id, course_id)
-    result = modify_db(query)
+    result = call_db_proc('insert_new_reward_punishment', param_tuple)
     if result is True:
         return True
     else:
         return False
+
 
 def add_student_course_info(student_id: int, course_id: int, grade):
     query = None
@@ -416,8 +468,34 @@ def add_student_course_info(student_id: int, course_id: int, grade):
     else:
         return False
 
-if __name__ == "__main__":
-    student_info = get_student_info_list(0)
-    course_info = get_full_course_info_list()
-    print(student_info)
 
+def add_student_reward_punishment_info(student_id: int, reward_punishment_id: int):
+    query = "INSERT INTO student_reward_punish (sno, rno) VALUES ({}, {})".format(student_id, reward_punishment_id)
+    result = modify_db(query)
+    if result is True:
+        return True
+    else:
+        return False
+
+
+def delete_student_course_info(student_id: int, course_id: int):
+    query = "DELETE FROM student_course WHERE sno = {} AND cno = {}".format(student_id, course_id)
+    result = modify_db(query)
+    if result is True:
+        return True
+    else:
+        return False
+
+
+def delete_student_reward_punishment_info(student_id: int, reward_punishment_id: int):
+    query = "DELETE FROM student_reward_punish WHERE sno = {} AND rno = {}".format(student_id, reward_punishment_id)
+    result = modify_db(query)
+    if result is True:
+        return True
+    else:
+        return False
+
+
+if __name__ == "__main__":
+    course_info = get_single_course_info_by_id(30001)
+    print(course_info)

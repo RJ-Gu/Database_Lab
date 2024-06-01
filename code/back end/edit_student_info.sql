@@ -1,4 +1,5 @@
 DELIMITER //
+DROP PROCEDURE IF EXISTS edit_student_info;
 CREATE PROCEDURE edit_student_info(IN no INT, IN name VARCHAR(20), IN sex CHAR(2), IN id CHAR(18), phone CHAR(11),
                                    ethics VARCHAR(20), place VARCHAR(20), level VARCHAR(20))
 BEGIN

@@ -1,0 +1,139 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>
+    <link rel="shortcut icon" href="{{ url_for('static', filename='favicon.ico') }}">
+    <title>学籍管理系统——修改课程基本信息</title>
+    <!-- 引入Bootstrap的CSS文件 -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css">
+    <link rel="stylesheet" href="{{ url_for('static', filename='styles.css')}}">
+    <script src="{{ url_for('static', filename='function.js') }}"></script>
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script>
+        // 从后端获取的学院专业列表，初始化下拉框
+        // 格式：[{'id': 50001, 'name': '计算机学院', 'major': [{'id': 40001, 'name': '计算机科学与技术'}, {'id': 40002, 'name': '软件工程'}, {'id': 40003, 'name': '网络工程'}, {'id': 40004, 'name': '信息安全'}]}, {'id': 50002, 'name': '化学学院', 'major': [{'id': 40005, 'name': '化学'}]}, {'id': 50003, 'name': '物理学院', 'major': [{'id': 40006, 'name': '物理学'}]}, {'id': 50004, 'name': '数学学院', 'major': [{'id': 40007, 'name': '数学'}]}, {'id': 50005, 'name': '生物学院', 'major': [{'id': 40008, 'name': '生物学'}]}]
+
+        $(document).ready(function () {
+            var json_string = {{ full_college_major_info_list | tojson }};
+            var full_college_major_list = JSON.parse(json_string);
+            var collegeSelect = document.getElementById('collegeSelect');
+            var majorSelect = document.getElementById('majorSelect');
+
+            // 初始化学院下拉框
+            for (var i = 0; i < full_college_major_list.length; i++) {
+                var collegeOption = document.createElement('option');
+                collegeOption.value = full_college_major_list[i].id;
+                collegeOption.text = full_college_major_list[i].name;
+                collegeSelect.appendChild(collegeOption);
+            }
+
+            // 学院下拉框改变时，初始化专业下拉框
+            collegeSelect.addEventListener('change', function () {
+                majorSelect.innerHTML = '';
+                var college_id = collegeSelect.value;
+                if (college_id == 0) {
+                    majorSelect.disabled = true;
+                    return;
+                }
+                majorSelect.disabled = false;
+                var major_list = full_college_major_list.find(function (item) {
+                    return item.id == college_id;
+                }).major;
+                for (var i = 0; i < major_list.length; i++) {
+                    var majorOption = document.createElement('option');
+                    majorOption.value = major_list[i].id;
+                    majorOption.text = major_list[i].name;
+                    majorSelect.appendChild(majorOption);
+                }
+            });
+        });
+
+        function generate_href_and_submit() {
+            var form = document.getElementsByTagName('form')[0];
+            form.action = generate_href_with_operator_id_and_course_id('edit_single_course_info', {{ operator_id }}, {{ course_id }});
+            form.submit();
+        }
+    </script>
+</head>
+<body>
+<div class="container mt-5">
+    <h1 class="text-center">修改课程基本信息</h1>
+    <form action="/edit_single_student_info" method="post">
+        <table class="table table-striped table-bordered">
+            <thead>
+            <tr>
+                <th>属性</th>
+                <th>值</th>
+            </tr>
+            </thead>
+            <tbody>
+            <tr>
+                <td>课程号</td>
+                <td>{{ course_info.id }}</td>
+            </tr>
+            <tr>
+                <td>课程名</td>
+                <td>
+                    <input type="text" name="name" value="{{ course_info.name }} " class="form-control">
+                </td>
+            </tr>
+            <tr>
+                <td>学分</td>
+                <td>
+                    <input type="number"  step="0.5" name="credit" value="{{ course_info.credit }}" class="form-control">
+                </td>
+            </tr>
+            <tr>
+                <td>学时</td>
+                <td>
+                    <input type="number" name="full_time" value="{{ course_info.full_time }}" class="form-control">
+                </td>
+            </tr>
+            <tr>
+                <td>课程类型</td>
+                <td>
+                    <select name="type" class="form-select">
+                        <option value="必修" {% if course_info.type == '必修' %}selected{% endif %}>必修</option>
+                        <option value="选修" {% if course_info.type == '选修' %}selected{% endif %}>选修</option>
+                    </select>
+                </td>
+            </tr>
+            <tr>
+                <td>上课时间</td>
+                <td>
+                    <input type="text" name="time" value="{{ course_info.time }}" class="form-control">
+                </td>
+            </tr>
+            <tr>
+                <td>上课地点</td>
+                <td>
+                    <input type="text" name="place" value="{{ course_info.location }}" class="form-control">
+                </td>
+            </tr>
+            <tr>
+                <td>开设学院</td>
+                <td>
+                    <select class="form-select" id="collegeSelect" name="college">
+                        <option value="0">请选择学院</option>
+                    </select>
+                </td>
+            </tr>
+            <tr>
+                <td>开设专业</td>
+                <td>
+                    <select class="form-select" id="majorSelect" name="major" disabled="disabled">
+                        <option value="0">请选择专业</option>
+                    </select>
+                </td>
+            </tr>
+            </tbody>
+        </table>
+        <button type="submit" value="保存" class="btn btn-primary" onclick="generate_href_and_submit()">保存</button>
+    </form>
+</div>
+
+<!-- 引入Bootstrap的JS文件 -->
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+
+</body>
+</html>
