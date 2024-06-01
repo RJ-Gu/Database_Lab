@@ -345,6 +345,30 @@ def get_full_reward_punishment_info_list():
     return reward_punishment_list
 
 
+def get_teacher_info_list():
+    query = "SELECT * FROM teacher"
+    err, result = query_db(query)
+    if err is False:
+        return None
+    teacher_list = []
+    for teacher_tuple in result:
+        teacher_dict = {
+            'id': teacher_tuple[0],
+            'name': teacher_tuple[1],
+            'title': teacher_tuple[6]
+        }
+        teacher_list.append(teacher_dict)
+        # 增加教师所在学院
+        query = ("SELECT college.cname FROM college, teacher "
+                 "WHERE college.cno = teacher.tcollege AND teacher.tno = {}"
+                 ).format(teacher_tuple[0])
+        err, result = query_db(query)
+        if err is False:
+            return None
+        teacher_dict['college'] = result[0][0]
+    return teacher_list
+
+
 def update_student_info(new_student_info: dict):
     # 生成传输给sql的参数列表
     param_tuple = (
@@ -371,6 +395,20 @@ def update_course_info(new_course_info: dict):
         return True
     else:
         return False
+
+
+def update_course_teacher_info(course_id: int, teacher_ids: list):
+    # 先删除原有的教师-课程关系
+    query = "DELETE FROM teacher_course WHERE cno = {}".format(course_id)
+    result = modify_db(query)
+    if result is False:
+        return False
+    for teacher_id in teacher_ids:
+        query = "INSERT INTO teacher_course (tno, cno) VALUES ({}, {})".format(teacher_id, course_id)
+        result = modify_db(query)
+        if result is False:
+            return False
+    return True
 
 
 def major_change(new_major_change_info: dict):

@@ -327,6 +327,31 @@ def edit_single_course_info():
             """.format(course_id, operator_id)
 
 
+@app.route('/edit_course_teacher_info', methods=['GET', 'POST'])
+def edit_course_teacher_info():
+    if request.method == 'GET':
+        operator_id = request.args.get('operator_id', type=int)
+        course_id = request.args.get('course_id', type=int)
+        course_info = back_end_interaction.get_single_course_info_by_id(course_id)
+        course_info_json = json.dumps(course_info)
+        teacher_info_list = back_end_interaction.get_teacher_info_list()
+        # teacher_info_list_json = json.dumps(teacher_info_list)
+        return render_template('edit_course_teacher_info.html', operator_id=operator_id, course_id=course_id,
+                               teacher_info_list=teacher_info_list, course_info=course_info, course_info_json=course_info_json)
+    else:
+        operator_id = request.args.get('operator_id', type=int)
+        course_id = request.args.get('course_id', type=int)
+        teacher_ids = request.form.getlist('teacher_id')
+        # print(teacher_ids)
+        result = back_end_interaction.update_course_teacher_info(course_id, teacher_ids)
+        return """
+        <script>
+        alert('更新成功！');
+        window.location.href = "/course_info?operator_id={}";
+        </script>
+        """.format(operator_id)
+
+
 @app.route('/change_major', methods=['GET', 'POST'])
 def change_major():
     if request.method == 'GET':

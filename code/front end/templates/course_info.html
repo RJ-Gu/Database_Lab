@@ -56,7 +56,7 @@
                 </ul>
                 {% if operator_id == 0 %}
                 <button class="btn-primary btn"
-                        onclick="generate_href_with_operator_id_and_course_id('/edit_course_teacher', 0, {{ course.id }})">
+                        onclick="window.location.href=generate_href_with_operator_id_and_course_id('/edit_course_teacher_info', 0, {{ course.id }})">
                         修改课程教师信息
                 </button>
                 {% endif %}
