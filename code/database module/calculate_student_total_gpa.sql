@@ -33,5 +33,3 @@ BEGIN
 
 END //
 DELIMITER ;
-
-SELECT calculate_student_total_gpa(10001);

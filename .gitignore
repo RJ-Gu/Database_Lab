@@ -160,3 +160,5 @@ cython_debug/
 .idea/
 
 front end/static/student_images/*
+
+*.pdf

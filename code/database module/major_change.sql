@@ -15,5 +15,3 @@ BEGIN
     end if;
 end //
 DELIMITER ;
-
-CALL major_change(10001, 40006);
